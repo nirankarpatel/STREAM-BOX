@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StreamBox — Netflix‑style Page (HTML + CSS only)</title>
+  <meta name="description" content="A Netflix-like static webpage built with only HTML and CSS." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0a0a;
+      --panel:#111214;
+      --muted:#9aa0a6;
+      --text:#ffffff;
+      --brand:#e50914; /* Netflix red-ish */
+      --card:#1a1b1f;
+      --card-2:#202127;
+      --radius:18px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;}
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.4;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+
+    /* Top nav */
+    .nav{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:saturate(1.2) blur(8px);
+      background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.35));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px;}
+    .logo{font-weight:800;font-size:24px;letter-spacing:-.3px}
+    .logo .accent{color:var(--brand)}
+    .nav-links{display:none;gap:16px;color:#ddd}
+    .nav-links a{opacity:.85}
+    .nav-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .search{position:relative}
+    .search input{
+      width:220px;max-width:40vw;
+      background:rgba(255,255,255,.08);
+      color:#fff;border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;padding:10px 14px 10px 36px;outline:none;
+    }
+    .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.6}
+    .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ff5b5b,#ff8a00)}
+
+    @media(min-width:900px){.nav-links{display:flex}}
+
+    /* Hero */
+    .hero{
+      position:relative;isolation:isolate;
+      aspect-ratio:16/7;max-height:70vh;min-height:360px;
+      display:grid;place-items:end;overflow:hidden;
+      border-bottom-left-radius:var(--radius);
+      border-bottom-right-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .hero img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.05) saturate(1.1)}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.65) 70%,rgba(10,10,10,1) 100%)}
+    .hero-content{position:relative;padding:28px 20px 36px;max-width:1200px;width:100%;margin:0 auto}
+    .title{font-size:clamp(28px,4vw,56px);font-weight:800;margin:0 0 10px}
+    .sub{max-width:760px;color:#e6e6e6;opacity:.88}
+    .cta{display:flex;gap:12px;margin-top:16px}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      background:#fff;color:#000;border:none;border-radius:999px;
+      padding:12px 18px;font-weight:700;cursor:pointer
+    }
+    .btn.secondary{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.2)}
+    .pill{display:inline-block;background:rgba(229,9,20,.18);border:1px solid rgba(229,9,20,.35);color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600}
+
+    /* Rows */
+    .rows{max-width:1200px;margin:24px auto;padding:0 20px}
+    .row{margin-top:22px}
+    .row h3{margin:0 0 12px;font-size:18px}
+    .rail{display:flex;gap:12px;overflow:auto;padding-bottom:8px;scrollbar-width:thin}
+    .card{
+      position:relative;flex:0 0 180px;height:250px;border-radius:14px;overflow:hidden;
+      background:var(--card);border:1px solid rgba(255,255,255,.08);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(0,0,0,.45);border-color:rgba(255,255,255,.18)}
+    .card img{width:100%;height:100%;object-fit:cover}
+    .badge{position:absolute;left:8px;top:8px;padding:4px 8px;font-size:11px;border-radius:999px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2)}
+    .card .overlay{position:absolute;inset:auto 0 0 0;padding:10px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.75));}
+    .card .name{font-weight:700;font-size:14px}
+    .card .meta{font-size:12px;color:#cfcfcf;opacity:.85}
+
+    /* Plans / Footer */
+    .plans{max-width:1200px;margin:26px auto;padding:0 20px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:800px){.grid{grid-template-columns:repeat(3,1fr)}}
+    .plan{background:var(--card-2);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .plan h4{margin:0 0 8px}
+    .plan .price{font-size:28px;font-weight:800}
+    .plan ul{margin:12px 0 0;padding:0;list-style:none;color:#dadada}
+    .plan li{padding:6px 0;border-top:1px dashed rgba(255,255,255,.12)}
+    .plan li:first-child{border-top:none}
+
+    footer{max-width:1200px;margin:40px auto 60px;padding:0 20px;color:var(--muted);font-size:14px}
+    footer .links{display:flex;flex-wrap:wrap;gap:16px}
+    footer .bar{height:1px;background:rgba(255,255,255,.08);margin:16px 0}
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="logo"><span class="accent">Stream</span>Box</div>
+      <nav class="nav-links" aria-label="primary">
+        <a href="#">Home</a>
+        <a href="#">Series</a>
+        <a href="#">Films</a>
+        <a href="#">New & Popular</a>
+        <a href="#">My List</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="search" role="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <label class="sr-only" for="q">Search</label>
+          <input id="q" type="search" placeholder="Search titles" />
+        </div>
+        <div class="avatar" aria-hidden="true"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <img class="bg" src="https://images.unsplash.com/photo-1522881193457-37ae97c905bf?q=80&w=1600&auto=format&fit=crop" alt="Show backdrop" />
+    <div class="hero-content">
+      <span class="pill">NEW • SEASON 2</span>
+      <h1 class="title">Echoes of Tomorrow</h1>
+      <p class="sub">When a routine hack unlocks a time‑loop glitch, a reluctant coder must relive the same night across shifting timelines to stop a citywide collapse.</p>
+      <div class="cta">
+        <a class="btn" href="#trending" aria-label="Play Echoes of Tomorrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+          Play
+        </a>
+        <a class="btn secondary" href="#more" aria-label="More info about Echoes of Tomorrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          More Info
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rows of Titles -->
+  <main class="rows" id="more">
+    <section class="row" id="trending">
+      <h3>Trending Now</h3>
+      <div class="rail" role="list">
+        <!-- 8 sample cards -->
+        <article class="card" role="listitem" aria-label="Crimson Horizon">
+          <span class="badge">98% match</span>
+          <img src="https://picsum.photos/seed/poster-1/400/600" alt="Crimson Horizon poster" />
+          <div class="overlay">
+            <div class="name">Crimson Horizon</div>
+            <div class="meta">2019 • 2h 02m • Action</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Neon Alley">
+          <span class="badge">95% match</span>
+          <img src="https://picsum.photos/seed/poster-2/400/600" alt="Neon Alley poster" />
+          <div class="overlay">
+            <div class="name">Neon Alley</div>
+            <div class="meta">2021 • 1h 48m • Thriller</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Echoes of Tomorrow">
+          <span class="badge">97% match</span>
+          <img src="https://picsum.photos/seed/poster-3/400/600" alt="Echoes of Tomorrow poster" />
+          <div class="overlay">
+            <div class="name">Echoes of Tomorrow</div>
+            <div class="meta">2023 • 1h 54m • Sci‑Fi</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Paper Planets">
+          <span class="badge">92% match</span>
+          <img src="https://picsum.photos/seed/poster-4/400/600" alt="Paper Planets poster" />
+          <div class="overlay">
+            <div class="name">Paper Planets</div>
+            <div class="meta">2020 • 1h 32m • Family</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Silent Voltage">
+          <span class="badge">94% match</span>
+          <img src="https://picsum.photos/seed/poster-5/400/600" alt="Silent Voltage poster" />
+          <div class="overlay">
+            <div class="name">Silent Voltage</div>
+            <div class="meta">2018 • 2h 10m • Drama</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Quantum Motel">
+          <span class="badge">93% match</span>
+          <img src="https://picsum.photos/seed/poster-6/400/600" alt="Quantum Motel poster" />
+          <div class="overlay">
+            <div class="name">Quantum Motel</div>
+            <div class="meta">2017 • 1h 40m • Mystery</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Carbon Hearts">
+          <span class="badge">96% match</span>
+          <img src="https://picsum.photos/seed/poster-7/400/600" alt="Carbon Hearts poster" />
+          <div class="overlay">
+            <div class="name">Carbon Hearts</div>
+            <div class="meta">2022 • 1h 58m • Romance</div>
+          </div>
+        </article>
+        <article class="card" role="listitem" aria-label="Midnight Operator">
+          <span class="badge">91% match</span>
+          <img src="https://picsum.photos/seed/poster-8/400/600" alt="Midnight Operator poster" />
+          <div class="overlay">
+            <div class="name">Midnight Operator</div>
+            <div class="meta">2019 • 2h 05m • Crime</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="row">
+      <h3>Top Picks For You</h3>
+      <div class="rail" role="list">
+        <!-- duplicate structure with different seeds for variety -->
+        <article class="card" role="listitem" aria-label="Afterlight">
+          <span class="badge">97% match</span>
+          <img src="https://picsum.photos/seed/poster-9/400/600" alt="Afterlight poster" />
+          <div class="overlay"><div class="name">Afterlight</div><div class="meta">2020 • 1h 44m • Drama</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Vector Dreams">
+          <span class="badge">95% match</span>
+          <img src="https://picsum.photos/seed/poster-10/400/600" alt="Vector Dreams poster" />
+          <div class="overlay"><div class="name">Vector Dreams</div><div class="meta">2016 • 1h 36m • Animation</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Gossip Protocol">
+          <span class="badge">92% match</span>
+          <img src="https://picsum.photos/seed/poster-11/400/600" alt="Gossip Protocol poster" />
+          <div class="overlay"><div class="name">Gossip Protocol</div><div class="meta">2018 • 1h 52m • Comedy</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Shadow Circuit">
+          <span class="badge">96% match</span>
+          <img src="https://picsum.photos/seed/poster-12/400/600" alt="Shadow Circuit poster" />
+          <div class="overlay"><div class="name">Shadow Circuit</div><div class="meta">2017 • 2h 01m • Tech-Noir</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Sapphire Skies">
+          <span class="badge">90% match</span>
+          <img src="https://picsum.photos/seed/poster-13/400/600" alt="Sapphire Skies poster" />
+          <div class="overlay"><div class="name">Sapphire Skies</div><div class="meta">2015 • 1h 29m • Adventure</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Borrowed Time">
+          <span class="badge">93% match</span>
+          <img src="https://picsum.photos/seed/poster-14/400/600" alt="Borrowed Time poster" />
+          <div class="overlay"><div class="name">Borrowed Time</div><div class="meta">2019 • 1h 47m • Thriller</div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="row">
+      <h3>Sci‑Fi Worlds</h3>
+      <div class="rail" role="list">
+        <article class="card" role="listitem" aria-label="Lunar Arcade">
+          <span class="badge">94% match</span>
+          <img src="https://picsum.photos/seed/poster-15/400/600" alt="Lunar Arcade poster" />
+          <div class="overlay"><div class="name">Lunar Arcade</div><div class="meta">2018 • 1h 50m • Sci‑Fi</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Wired Meadows">
+          <span class="badge">92% match</span>
+          <img src="https://picsum.photos/seed/poster-16/400/600" alt="Wired Meadows poster" />
+          <div class="overlay"><div class="name">Wired Meadows</div><div class="meta">2022 • 2h 04m • Sci‑Fi</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Tiger’s Code">
+          <span class="badge">91% match</span>
+          <img src="https://picsum.photos/seed/poster-17/400/600" alt="Tiger’s Code poster" />
+          <div class="overlay"><div class="name">Tiger’s Code</div><div class="meta">2023 • 1h 39m • Sci‑Fi</div></div>
+        </article>
+        <article class="card" role="listitem" aria-label="Glass River">
+          <span class="badge">95% match</span>
+          <img src="https://picsum.photos/seed/poster-18/400/600" alt="Glass River poster" />
+          <div class="overlay"><div class="name">Glass River</div><div class="meta">2016 • 1h 58m • Sci‑Fi</div></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- Plans -->
+  <section class="plans" aria-label="Plans">
+    <div class="grid">
+      <article class="plan" aria-labelledby="basic">
+        <h4 id="basic">Basic</h4>
+        <div class="price">₹199<span style="font-size:14px;font-weight:600;opacity:.7">/mo</span></div>
+        <ul>
+          <li>Good video quality</li>
+          <li>Watch on 1 device at a time</li>
+          <li>Ad‑free</li>
+        </ul>
+      </article>
+      <article class="plan" aria-labelledby="standard">
+        <h4 id="standard">Standard</h4>
+        <div class="price">₹499<span style="font-size:14px;font-weight:600;opacity:.7">/mo</span></div>
+        <ul>
+          <li>Better video quality (1080p)</li>
+          <li>Watch on 2 devices</li>
+          <li>Download to 2 devices</li>
+        </ul>
+      </article>
+      <article class="plan" aria-labelledby="premium">
+        <h4 id="premium">Premium</h4>
+        <div class="price">₹649<span style="font-size:14px;font-weight:600;opacity:.7">/mo</span></div>
+        <ul>
+          <li>Best video quality (4K+HDR)</li>
+          <li>Watch on 4 devices</li>
+          <li>Spatial audio</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="bar"></div>
+    <div class="links" aria-label="Footer links">
+      <a href="#">FAQ</a>
+      <a href="#">Help Center</a>
+      <a href="#">Account</a>
+      <a href="#">Media Center</a>
+      <a href="#">Jobs</a>
+      <a href="#">Privacy</a>
+      <a href="#">Cookie Preferences</a>
+      <a href="#">Legal Notices</a>
+    </div>
+    <p style="margin-top:14px">© <span id="y"></span> StreamBox. Built as a demo, not affiliated with Netflix.</p>
+  </footer>
+
+  <script>
+    // Replace year without needing frameworks (kept minimal; not required for layout)
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
